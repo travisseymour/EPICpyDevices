@@ -1,0 +1,518 @@
+// This model is based on F97x52cv1.prs with modifications
+
+// BothShapeColorGOptv4.prs
+// This version supports setting acuity to foveal to give a purely random search,
+// after commenting out the color/shape detection clauses,
+// but otherwise it is the same as BothShapeColorGOptv3.prs
+
+
+// Purpose of changes in this version
+// With a probability, we Guess - choose the random nomination regardless of whatever
+// else can be seen
+
+// if see both same shape & color, choose one; 
+// else, choose one with the same shape (and unknown color)
+// else, choose one with the same color (and unknown shape)
+// else, chose at random from all objects that have both unknown shape and unknown color
+// after waiting for the shape and color of somethings to be available.
+// else, choose at random from all objects regardless  of shape and color
+// after waiting for the shape and color of somethings to be available.
+
+// This is a two-cycle model based on previous single-cycle model that fit
+// pretty well. It uses a nominate-then-move strategy
+
+
+// based on F97x5scv5 in use of guess strategy, but much simpler rules
+
+
+;Model for Findlay 1997 x5
+; makes only one saccade, presses one of two keys for correct/incorrect
+(Define Initial_memory_contents (Goal Do Visual_search))
+(Define Named_location Fixation_point_location 0.0 0.0)
+
+(Define Parameters
+	// SUPERSEDED, SEE BELOW (Eye Eccentricity_fluctuation_factor Fixed 1.0) // was default of 50
+	(Eye Appear_disappear_transduction_time Fixed 20) // was 20
+
+//	linear coefficient of .1 to resemble acuity functions of other models
+	(Eye Availability Color Quadratic 49 1 0.5 0.1 0.1 0.004)
+	(Eye Availability Shape Quadratic 49 1 0.5 0.1 0.1 0.004)
+
+	(Visual_perceptual_processor Appear_disappear_recoding_time Normal When_used 15 3.8) // was 15
+	(Visual_perceptual_processor Visible_recoding_time Fixed 45)
+	(Visual_perceptual_processor Recoding_time_fluctuation_factor Fixed 1)
+	(Visual_perceptual_processor Recoding_time Color 45)
+	(Visual_perceptual_processor Recoding_time Shape 45)
+
+	// Suggested by DK for getting EPIClib 2014 behavior in the EPICLib 2016 version
+    // by turning off the new saccade shortfall behavior.
+    // these changes should be seen as a temporary fix, or used to
+    // re-produce old fits?
+    // More appropriate fix is to rewrite rules to keep saccading until target is in view!
+	// In particular, these settings turn off oculomotor noise to produce accurate saccades
+    (Eye Eccentricity_fluctuation_factor Normal When_used 1 .5)
+    (Ocular Voluntary_saccade_distance_slope Fixed 1.0) // default is 0.95
+    (Ocular Voluntary_saccade_SD_slope Fixed 0.0) // default is 0.10
+)
+
+// suggested by dk for 2014 behavior in the 2016 version
+// by turning off the new saccade shortfall behavior.
+// need to rewrite rules to keep saccading until target is in view.
+// these changes should be seen as a temporary fix, or used to
+// re-produce old fits?
+//(Define Parameters
+//	//	these settings turn off oculomotor noise to produce accurate saccades
+//	(Eye Eccentricity_fluctuation_factor Normal When_used 1 .5)
+//	(Ocular Voluntary_saccade_distance_slope Fixed 1.0) // default is 0.95
+//	(Ocular Voluntary_saccade_SD_slope Fixed 0.0) // default is 0.10
+//	//(Ocular Voluntary_saccade_angle_SD Fixed 0.0) //  default is 1 degree
+//)
+
+(Top_mfg
+If
+(
+	(Goal Do Visual_search)
+	(Not (Step ??? ???))
+ )
+Then
+(
+	(Add (Step Lookat Fixation_point))
+ )
+)
+
+(Top_lookat_fixation_point
+If
+(
+	(Goal Do Visual_search)
+	(Step Lookat Fixation_point)
+)
+Then
+(
+	(Send_to_motor Ocular Perform Move Fixation_point_location)
+	(Delete (Step Lookat Fixation_point))
+	(Add (Step Waitfor Fixation_present))
+))
+
+(Top_see_fixation_point
+If
+(
+	(Goal Do Visual_search)
+	(Step Waitfor Fixation_present)
+	(Visual ?fixation_point Shape Cross_Hairs)
+	(Visual ?fixation_point Color Red)
+)
+Then
+(
+	(Add (Tag ?fixation_point fixation_point))
+	(Delete (Step Waitfor Fixation_present))
+	(Add (Step Waitfor probe_speech))
+))
+
+; (Top_hear_probe
+; If
+; (
+; 	(Goal Do Visual_search)
+; 	(Step Waitfor probe_speech)
+; 	(Auditory ?word1 Content ?color)
+; 	(Auditory ?word1 Status Audible)
+; 	(Auditory ?word1 Next ?word2)
+; 	(Auditory ?word2 Content ?shape)
+; 	(Auditory ?word2 Status Audible)
+; )
+; Then
+; (
+; 	(Add (Tag ?color probe_color))
+; 	(Add (Tag ?shape probe_shape))
+; 	(Delete (Step Waitfor probe_speech))
+; 	(Add (Step Nominate Candidate))
+; ))
+
+(Top_hear_probe
+If
+(
+	(Goal Do Visual_search)
+	(Step Waitfor probe_speech)
+	(Auditory ?word1 Content ?color)
+	(Auditory ?word1 Status Audible)
+	(Auditory ?word1 Stream LeftSpeaker)
+	(Auditory ?word2 Content ?shape)
+	(Auditory ?word2 Status Audible)
+	(Auditory ?word2 Stream RightSpeaker)
+)
+Then
+(
+	(Add (Tag ?color probe_color))
+	(Add (Tag ?shape probe_shape))
+	(Delete (Step Waitfor probe_speech))
+	(Add (Step Nominate Candidate))
+))
+
+// NOMINATE OBJECTS TO LOOK AT
+
+
+(Top_nominate_complete_match
+If
+(
+	(Goal Do Visual_search)
+	(Step Nominate Candidate)
+	(Visual ?compmatch Status Visible)
+	(Visual ?compmatch Color ?cm_color)
+	(Tag ?cm_color probe_color)
+	(Visual ?compmatch Shape ?cm_shape)
+	(Tag ?cm_shape probe_shape)
+)
+Then
+(
+	(Add (Tag ?compmatch color_shape_candidate))
+	(Delete (Step Nominate Candidate))
+	(Add (Step Choose Candidate))
+))
+
+(Top_nominate_shape_unknown_color
+If
+(
+	(Goal Do Visual_search)
+	(Step Nominate Candidate)
+	(Visual ?shape_unk Status Visible)
+	(Visual ?shape_unk Shape ?shape_unk_shape)
+	(Tag ?shape_unk_shape probe_shape)
+	(Not (Visual ?shape_unk Color ???))
+	(Randomly_choose_one)
+)
+Then
+(
+	(Add (Tag ?shape_unk shape_unk_candidate))
+	(Delete (Step Nominate Candidate))
+	(Add (Step Choose Candidate))
+))
+
+(Top_nominate_color_unknown_shape
+If
+(
+	(Goal Do Visual_search)
+	(Step Nominate Candidate)
+	(Visual ?color_unk Status Visible)
+	(Visual ?color_unk Color ?color_unk_color)
+	(Tag ?color_unk_color probe_color)
+	(Not (Visual ?color_unk Shape ???))
+	(Randomly_choose_one)
+)
+Then
+(
+	(Add (Tag ?color_unk color_unk_candidate))
+	(Delete (Step Nominate Candidate))
+	(Add (Step Choose Candidate))
+))
+
+// nominate any object that lacks both color and shape information
+// but only if we can see that color of something has arrived.
+(Top_nominate_unknown_unknown_object1
+If
+(
+(THIS RULE IS DISABLED)
+	(Goal Do Visual_search)
+	(Step Nominate Candidate)
+	(Visual ??? Color ???)
+	(Visual ??? Shape ???)
+	(Visual ?candidate Status Visible)
+	(Not (Visual ?candidate Color ???))
+	(Not (Visual ?candidate Shape ???))	// both color and shape must be unknown
+	(Randomly_choose_one)
+)
+Then
+(
+	(Add (Tag ?candidate unk_unk_candidate))
+	(Delete (Step Nominate Candidate))
+	(Add (Step Choose Candidate))
+))
+
+(Top_nominate_random_object
+If
+(
+	(Goal Do Visual_search)
+	(Step Nominate Candidate)
+	(Visual ?candidate Status Visible)
+	(Not (Tag ?candidate fixation_point))
+	(Visual ??? Color ???)	// some Colored object must be visible
+	(Visual ??? Shape ???)	// some Shape object must be visible
+	(Randomly_choose_one)
+)
+Then
+(
+	(Add (Tag ?candidate random_candidate))
+	(Delete (Step Nominate Candidate))
+	(Add (Step Choose Candidate))
+))
+
+(Top_decide_to_guess
+If
+(
+	(Goal Do Visual_search)
+	(Step Nominate Candidate)
+	(Visual ?candidate Status Visible)
+	(Not (Tag ?candidate fixation_point))
+	(Visual ??? Color ???)	// some Colored object must be visible
+	(Visual ??? Shape ???)	// some Shape object must be visible
+	(Randomly_true 0.1)
+)
+Then
+(
+	(Add (Status make random_guess))
+	(Delete (Step Nominate Candidate))
+	(Add (Step Choose Candidate))
+))
+
+
+// CHOOSE FROM NOMINATIONS
+
+(Top_choose_random_guess
+If
+(	
+	(Goal Do Visual_search)
+	(Step Choose Candidate)
+	(Status make random_guess)
+	(Tag ?candidate random_candidate)
+	(Motor Ocular Processor Free)
+)
+Then
+(
+	(Send_to_motor Ocular Perform Move ?candidate)
+	(Add (Tag ?candidate candidate))
+	(Delete (Step Choose Candidate))
+	(Delete (Status make random_guess))
+	(Add (Step Waitfor Candidate))
+))
+
+(Top_choose_candidate_color_shape
+If
+(	
+	(Goal Do Visual_search)
+	(Step Choose Candidate)
+	(Tag ?candidate color_shape_candidate)
+	(Not (Status make random_guess))
+	(Motor Ocular Processor Free)
+)
+Then
+(
+	(Send_to_motor Ocular Perform Move ?candidate)
+	(Add (Tag ?candidate candidate))
+	(Delete (Step Choose Candidate))
+	(Add (Step Waitfor Candidate))
+))
+
+(Top_choose_candidate_unk_shape
+If
+(	
+	(Goal Do Visual_search)
+	(Step Choose Candidate)
+	(Tag ?candidate shape_unk_candidate)
+	(Not (Tag ??? color_shape_candidate))
+	(Not (Status make random_guess))
+	(Motor Ocular Processor Free)
+)
+Then
+(
+	(Send_to_motor Ocular Perform Move ?candidate)
+	(Add (Tag ?candidate candidate))
+	(Delete (Step Choose Candidate))
+	(Add (Step Waitfor Candidate))
+))
+
+(Top_choose_candidate_color_unk
+If
+(	
+	(Goal Do Visual_search)
+	(Step Choose Candidate)
+	(Tag ?candidate color_unk_candidate)
+	(Not (Tag ??? shape_unk_candidate))
+	(Not (Tag ??? color_shape_candidate))
+	(Not (Status make random_guess))
+	(Motor Ocular Processor Free)
+)
+Then
+(
+	(Send_to_motor Ocular Perform Move ?candidate)
+	(Delete (Tag ?candidate color_unk_candidate))
+	(Add (Tag ?candidate candidate))
+	(Delete (Step Choose Candidate))
+	(Add (Step Waitfor Candidate))
+))
+
+(Top_choose_candidate_unk_unk
+If
+ (	
+	(Goal Do Visual_search)
+	(Step Choose Candidate)
+	(Tag ?candidate unk_unk_candidate)
+	(Not (Tag ??? color_unk_candidate))
+	(Not (Tag ??? shape_unk_candidate))
+	(Not (Tag ??? color_shape_candidate))
+	(Not (Status make random_guess))
+	(Motor Ocular Processor Free)
+)
+Then
+(
+	(Send_to_motor Ocular Perform Move ?candidate)
+	(Delete (Tag ?candidate unk_unk_candidate))
+	(Add (Tag ?candidate candidate))
+	(Delete (Step Choose Candidate))
+	(Add (Step Waitfor Candidate))
+))
+
+(Top_choose_random_candidate
+If
+(	
+	(Goal Do Visual_search)
+	(Step Choose Candidate)
+	(Tag ?candidate random_candidate)
+	(Not (Tag ??? unk_unk_candidate))
+	(Not (Tag ??? color_unk_candidate))
+	(Not (Tag ??? shape_unk_candidate))
+	(Not (Tag ??? color_shape_candidate))
+	(Not (Status make random_guess))
+	(Motor Ocular Processor Free)
+)
+Then
+(
+	(Send_to_motor Ocular Perform Move ?candidate)
+	(Add (Tag ?candidate candidate))
+	(Delete (Step Choose Candidate))
+	(Add (Step Waitfor Candidate))
+))
+
+// WAIT FOR AND CHECK CANDIDATE
+
+// wait for all attributes to arrive before responding
+(Top_check_candidate_waitfor_attributes
+If
+(
+	(Goal Do Visual_search)
+	(Step Waitfor Candidate)
+	(Tag ?candidate candidate)
+	(Visual ?candidate Color ???)
+	(Visual ?candidate Shape ???)
+	(Motor Ocular Modality Free) // wait for e.m. done
+)
+Then
+(
+	(Delete (Step Waitfor Candidate))
+	(Add (Step Check Candidate))
+))
+
+(Top_check_candidate_complete_match
+If
+(
+	(Goal Do Visual_search)
+	(Step Check Candidate)
+	(Tag ?candidate candidate)
+	(Tag ?probe_color probe_color)
+	(Visual ?candidate Color ?probe_color)
+	(Tag ?probe_shape probe_shape)
+	(Visual ?candidate Shape ?probe_shape)
+)
+Then
+(
+//	(Log Complete_match: ?candidate ?probe_color ?probe_shape)
+	(Add (Tag ?candidate checked))
+	(Add (Tag ?candidate candidate))
+	(Delete (Step Check Candidate))
+	(Add (Step Make Correct_Response))
+))
+
+
+// 	Wait for a mismatching candidate color, shape, property to arrive
+(Top_check_candidate_mismatch_color
+If
+(
+	(Goal Do Visual_search)
+	(Step Check Candidate)
+	(Tag ?candidate candidate)
+	(Tag ?probe_color probe_color)
+	(Visual ?candidate Color ?candidate_color)
+	(Different ?probe_color ?candidate_color)
+)
+Then
+(
+//	(Log Color_mismatch: ?probe_color ?candidate_color)
+	(Add (Tag ?candidate checked))
+	(Delete (Step Check Candidate))
+	(Add (Step Make Incorrect_Response))
+))
+
+(Top_check_candidate_mismatch_shape
+If
+(
+	(Goal Do Visual_search)
+	(Step Check Candidate)
+	(Tag ?candidate candidate)
+	(Tag ?probe_shape probe_shape)
+	(Visual ?candidate Shape ?candidate_shape)
+	(Different ?probe_shape ?candidate_shape)
+)
+Then
+(
+//	(Log Shape_mismatch: ?probe_shape ?candidate_shape)
+	(Add (Tag ?candidate checked))
+//	(Delete (Tag ?candidate candidate))
+	(Delete (Step Check Candidate))
+	(Add (Step Make Incorrect_Response))
+))
+
+
+(Top_make_correct_response
+If
+(
+	(Goal Do Visual_search)
+	(Step Make Correct_Response)
+	(Motor Manual Modality Free)
+)
+Then
+(
+	(Send_to_motor Manual Perform Punch / Right Index)
+	(Delete (Step Make Correct_Response))
+	(Add (Step Wait_for Feedback))
+))
+
+(Top_make_incorrect_response
+If
+(
+	(Goal Do Visual_search)
+	(Step Make Incorrect_Response)
+	(Motor Manual Modality Free)
+)
+Then
+(
+	(Send_to_motor Manual Perform Punch Z Left Index)
+	(Delete (Step Make Incorrect_Response))
+	(Add (Step Wait_for Feedback))
+))
+
+
+// feedback is lack of any visible objects
+(Top_got_feedback
+If
+(
+	(Goal Do Visual_search)
+	(Step Wait_for Feedback)
+	(Not (Visual ??? Status Visible))
+)
+Then
+(
+	(Delete (Step Wait_for Feedback))
+	(Add (Step Cleanup Memory))
+))
+
+(Top_cleanup
+If
+(
+	(Goal Do Visual_search)
+	(Step Cleanup Memory)
+	(Tag ?x ?y)
+)
+Then
+(
+	(Delete (Tag ?x ?y))
+	(Delete (Step Cleanup Memory))
+	(Add (Step Lookat Fixation_point))
+))
+

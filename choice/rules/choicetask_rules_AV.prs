@@ -1,0 +1,178 @@
+// Choice Task Rules Auditory-Vocal Version
+// choice_device.py
+
+//Setup Initial WM contents.
+(Define Initial_memory_contents (Goal Do choice_task))
+
+(Define Parameters
+	//(Visual_perceptual_processor Recoding_failure_rate1 Fixed 0.5)
+	//(Auditory_perceptual_processor Recoding_failure_rate1 Fixed 0.5)
+	(Manual Execution_fluctuation_factor Normal When_used 1.0 0.1)
+	(Eye Eccentricity_fluctuation_factor Normal When_used 1.0 0.1)
+	(Eye Property_delay_fluctuation_factor Normal When_used 1.0 0.1)
+)
+
+(Define Named_location Center_screen 0. 0.)
+
+//**********************************************************************************************
+//             BLOCK AND TRIAL MANAGEMENT RULES
+//**********************************************************************************************
+
+(TRIAL_mfg
+If
+(
+	(Goal Do choice_task)
+	(Not (Step ??? ???))
+ )
+Then
+(
+	(Add (Step Start Trial))
+ )
+)
+
+
+(TRIAL_start_trial
+If
+(
+	(Goal Do choice_task)
+	(Step Start Trial)
+ )
+Then
+(
+	(Delete (Step Start Trial))
+	(Add (Step Waitfor Auditory_Fixation_Onset))
+ )
+)
+
+
+(TRIAL_cleanup_tags
+If (
+	(Goal Do choice_task)
+	(Step Cleanup Memory)
+	(Tag ?x ?y)
+)
+Then (
+	(Delete (Tag ?x ?y))
+	(Delete (Step Cleanup Memory))
+))
+
+
+//**********************************************************************************************
+//              MAIN RULESET
+//**********************************************************************************************
+
+(AUD_Auditory_warning_onset
+If
+(
+	(Goal Do choice_task)
+	(Step Waitfor Auditory_Fixation_Onset)
+	(Auditory ?x Detection Onset)
+	(Auditory ?x Stream Signal)
+)
+Then
+(
+	(Add (Tag ?x Fixation_Sound))
+	(Delete (Step Waitfor Auditory_Fixation_Onset))
+	(Add (Step Waitfor Auditory_Stimulus_Onset))
+))
+
+(AUD_Auditory_stimulus_onset
+If
+(
+	(Goal Do choice_task)
+	(Step Waitfor Auditory_Stimulus_Onset)
+	(Auditory ?x Detection Onset)
+	(Auditory ?x Stream Signal)
+	(Tag ?y Fixation_Sound)
+	(DIFFERENT ?x ?y)
+)
+Then
+(
+	(Add (Tag ?x Auditory_Stimulus))
+	(Delete (Step Waitfor Auditory_Stimulus_Onset))
+	(Add (Step Waitfor Auditory_Stimulus_Tone))
+))
+
+(AUD_auditory_stimulus_tone
+If
+(
+	(Goal Do choice_task)
+	(Step Waitfor Auditory_Stimulus_Tone)
+	(Tag ?auditorystimulus Auditory_Stimulus)
+	(Auditory ?auditorystimulus Timbre ?tone)
+)
+Then
+(
+	(Add (Tag ?tone Auditory_Stimulus_Timbre)) 
+	(Delete (Step Waitfor Auditory_Stimulus_Tone))
+	(Add (Step Make Auditory_Response))
+))
+
+//**********************************************************************************************
+//             PARALLEL RESPONSE MAPPING RULES
+//**********************************************************************************************
+
+(VOC_make_auditoryresponse_DING
+If
+(
+	(Goal Do choice_task)
+	(Step Make Auditory_Response)
+	(Tag ??? Auditory_Stimulus)
+	(Tag Ding Auditory_Stimulus_Timbre)
+	(Motor Vocal Preparation Free)
+)
+Then
+(
+	(Send_to_motor Vocal Perform Speak U)
+	(Delete (Step Make Auditory_Response))
+	(Add (Step Cleanup Memory))
+))
+
+(VOC_make_auditoryresponse_DONG
+If
+(
+	(Goal Do choice_task)
+	(Step Make Auditory_Response)
+	(Tag ??? Auditory_Stimulus)
+	(Tag Dong Auditory_Stimulus_Timbre)
+	(Motor Vocal Preparation Free)
+)
+Then
+(
+	(Send_to_motor Vocal Perform Speak I)
+	(Delete (Step Make Auditory_Response))
+	(Add (Step Cleanup Memory))
+))
+
+(VOC_make_auditoryresponse_BING
+If
+(
+	(Goal Do choice_task)
+	(Step Make Auditory_Response)
+	(Tag ??? Auditory_Stimulus)
+	(Tag Bing Auditory_Stimulus_Timbre)
+	(Motor Vocal Preparation Free)
+)
+Then
+(
+	(Send_to_motor Vocal Perform Speak O)
+	(Delete (Step Make Auditory_Response))
+	(Add (Step Cleanup Memory))
+))
+
+(VOC_make_auditoryresponse_BONG
+If
+(
+	(Goal Do choice_task)
+	(Step Make Auditory_Response)
+	(Tag ??? Auditory_Stimulus)
+	(Tag Bong Auditory_Stimulus_Timbre)
+	(Motor Vocal Preparation Free)
+)
+Then
+(
+	(Send_to_motor Vocal Perform Speak P)
+	(Delete (Step Make Auditory_Response))
+	(Add (Step Cleanup Memory))
+))
+

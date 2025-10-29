@@ -1,7 +1,7 @@
 import math
 from typing import List
 
-from epicpy.epiclib.epiclib import geometric_utilities as gu
+from epiclibcpp.epiclib import geometric_utilities as gu
 from plum import dispatch
 
 """

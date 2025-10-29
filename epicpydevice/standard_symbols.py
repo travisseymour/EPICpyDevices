@@ -1,4 +1,4 @@
-from epicpy.epiclib.epiclib import Symbol, standard_symbols as std_sym
+from epiclibcpp.epiclib import Symbol, standard_symbols as std_sym
 
 
 """

@@ -1,9 +1,9 @@
 from typing import Any
 
-from epicpy.epiclib.epiclib import Visual_encoder_base, Symbol
-from epicpy.epiclib.epiclib.standard_utility_symbols import Nil_c
-from epicpy.epiclib.epiclib import geometric_utilities as gu
-from epicpy.epiclib.epiclib.output_tee_globals import (Normal_out, Exception_out, Debug_out)
+from epiclibcpp.epiclib import Visual_encoder_base, Symbol
+from epiclibcpp.epiclib.standard_utility_symbols import Nil_c
+from epiclibcpp.epiclib import geometric_utilities as gu
+from epiclibcpp.epiclib.output_tee_globals import (Normal_out, Exception_out, Debug_out)
 
 # EpicPy will expect all visual encoders to be of class
 # VisualEncoder and subclassed from Visual_encoder_base

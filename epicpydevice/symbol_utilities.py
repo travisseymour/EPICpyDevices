@@ -2,7 +2,7 @@ from typing import List
 
 from plum import dispatch
 
-from epicpy.epiclib.epiclib import (
+from epiclibcpp.epiclib import (
     Output_tee,
     Symbol,
     symbol_utilities,

@@ -1,5 +1,5 @@
-from epicpy.epiclib.epiclib import Symbol
-from epicpy.epiclib.epiclib.standard_utility_symbols import (Default_c, Absent_c, Unknown_c, None_c, Nil_c, Empty_string_c)
+from epiclibcpp.epiclib import Symbol
+from epiclibcpp.epiclib.standard_utility_symbols import (Default_c, Absent_c, Unknown_c, None_c, Nil_c, Empty_string_c)
 
 """
 These are standard names known inside the architecture as symbols

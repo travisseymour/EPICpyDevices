@@ -15,10 +15,10 @@ import pandas
 from matplotlib.figure import Figure
 from plum import dispatch
 
-from epicpy.epiclib.epiclib import Output_tee
-from epicpy.epiclib.epiclib import Device_base, Symbol, Speech_word
-from epicpy.epiclib.epiclib.output_tee_globals import (Exception_out, Debug_out, Device_out)
-import epicpy.epiclib.epiclib.geometric_utilities as gu
+from epiclibcpp.epiclib import Output_tee
+from epiclibcpp.epiclib import Device_base, Symbol, Speech_word
+from epiclibcpp.epiclib.output_tee_globals import (Exception_out, Debug_out, Device_out)
+import epiclibcpp.epiclib.geometric_utilities as gu
 
 e_boxed_x = "\u274E"
 e_boxed_check = "\u2611"

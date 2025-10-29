@@ -1,4 +1,4 @@
-import epicpy.epiclib.epiclib.random_utilities as ru
+import epiclibcpp.epiclib.random_utilities as ru
 import random
 
 # NOTE: Unfortunately, the seed somehow gets set on pybind11 translation(?), the

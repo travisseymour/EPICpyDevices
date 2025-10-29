@@ -1,12 +1,12 @@
 from typing import List
 
-# from epicpy.epiclib.epiclib import statistics, rms_statistics, geometric_utilities as gu
+# from epiclibcpp.epiclib import statistics, rms_statistics, geometric_utilities as gu
 
-import epicpy.epiclib.epiclib
+import epiclibcpp.epiclib
 
-epic_statistics = epicpy.epiclib.epiclib.statistics
-rms_statistics = epicpy.epiclib.epiclib.rms_statistics
-gu = epicpy.epiclib.epiclib.geometric_utilities
+epic_statistics = epiclibcpp.epiclib.statistics
+rms_statistics = epiclibcpp.epiclib.rms_statistics
+gu = epiclibcpp.epiclib.geometric_utilities
 
 
 class Mean_accumulator:

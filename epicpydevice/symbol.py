@@ -1,7 +1,7 @@
 from typing import List, Union
 from plum import dispatch
 
-from epicpy.epiclib.epiclib import Symbol as _Symbol, geometric_utilities as gu
+from epiclibcpp.epiclib import Symbol as _Symbol, geometric_utilities as gu
 
 
 class Symbol:

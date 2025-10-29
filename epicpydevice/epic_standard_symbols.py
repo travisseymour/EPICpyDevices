@@ -1,5 +1,5 @@
-from epicpy.epiclib.epiclib import Symbol
-import epicpy.epiclib.epiclib.epic_standard_symbols as epic_sym
+from epiclibcpp.epiclib import Symbol
+import epiclibcpp.epiclib.epic_standard_symbols as epic_sym
 
 """
 These are standard names known inside the architecture as symbols

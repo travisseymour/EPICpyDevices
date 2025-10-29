@@ -1,4 +1,4 @@
-from epicpy.epiclib.epiclib import syllable_counter
+from epiclibcpp.epiclib import syllable_counter
 
 
 def count_total_syllables(text: str) -> int:

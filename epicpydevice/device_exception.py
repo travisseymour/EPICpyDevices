@@ -1,4 +1,4 @@
-from epicpy.epiclib.epiclib import raise_device_exception
+from epiclibcpp.epiclib import raise_device_exception
 
 raise_device_exception = raise_device_exception
 

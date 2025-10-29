@@ -1,4 +1,4 @@
-from epicpy.epiclib.epiclib import (
+from epiclibcpp.epiclib import (
     Symbol,
     geometric_utilities as gu,
     Speech_word as speech_word,

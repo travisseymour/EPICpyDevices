@@ -1,4 +1,4 @@
-from epicpy.epiclib.epiclib import numeric_utilities as nu
+from epiclibcpp.epiclib import numeric_utilities as nu
 
 from plum import dispatch
 

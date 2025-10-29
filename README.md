@@ -1,24 +1,5 @@
 # EPICpyDevices
 
-<table role="presentation" style="border-collapse:collapse;">
-  <tr>
-    <td style="padding-right:12px; vertical-align:middle;">
-      <img
-        title="WARNING"
-        src="https://freesvg.org/storage/img/thumb/Anonymous_attention.png"
-        alt="Alt text"
-        width="100"
-        style="max-width:100px; height:auto; display:block;"
-      >
-    </td>
-    <td style="vertical-align:middle; font-weight:bold; color:yellow;">
-      WARNING, BREAKING CHANGES COMING NEXT WEEK!<br>- Travis Seymour, Oct 24, 2025
-    </td>
-  </tr>
-</table>
-
-
-
 ## Devices Folder
 
 Sample _Devices_ for the EPICpy variant of the EPIC Computational Cognitive Architecture.
